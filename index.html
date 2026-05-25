@@ -495,13 +495,19 @@ function updateStreak() {
 }
 
 function buildGrid() {
-  const months = [{y:2026,m:2},{y:2026,m:3},{y:2026,m:4}];
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const now = new Date();
+  const months = [];
+  let my = 2026, mm = 2;
+  while (my < now.getFullYear() || (my === now.getFullYear() && mm <= now.getMonth())) {
+    months.push({y:my, m:mm});
+    mm++; if (mm > 11) { mm = 0; my++; }
+  }
   const todayKey = today();
-  const names = ["March","April","May"];
   let html = "";
-  months.forEach(({y,m}, idx) => {
+  months.forEach(({y,m}) => {
     const days = new Date(y, m+1, 0).getDate();
-    html += `<div class="month-block"><div class="month-header">${names[idx]} ${y}</div><div class="day-row">`;
+    html += `<div class="month-block"><div class="month-header">${monthNames[m]} ${y}</div><div class="day-row">`;
     for (let d = 1; d <= days; d++) {
       const date = new Date(y, m, d);
       const key = toKey(date);
