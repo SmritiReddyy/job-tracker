@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smriti's Job Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d0f0e;
+      --surface: #141716;
+      --surface2: #1b1e1c;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.13);
+      --text: #e8ede9;
+      --muted: #6b7a6d;
+      --accent: #3ddc84;
+      --accent2: #1a9e55;
+      --accent3: #0d5c30;
+      --accent4: #0a3d20;
+      --accent5: #071f10;
+      --l0: #1b1e1c;
+      --l1: #0d5c30;
+      --l2: #1a9e55;
+      --l3: #2ecc71;
+      --l4: #3ddc84;
+      --l5: #7fffb3;
+      --radius: 6px;
+      --font-mono: 'DM Mono', monospace;
+      --font-sans: 'DM Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      min-height: 100vh;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    header {
+      max-width: 860px;
+      margin: 0 auto 2.5rem;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+
+    header h1 {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+    }
+
+    header span {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .main {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Stats row */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-value.accent { color: var(--accent); }
+
+    /* Streak banner */
+    .streak-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .streak-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .streak-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .streak-dot.cold { background: var(--muted); }
+
+    .streak-num {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    .streak-num.cold { color: var(--muted); }
+
+    .streak-label { color: var(--muted); }
+
+    /* Log input */
+    .log-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .log-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-right: 4px;
+    }
+
+    input[type="date"], input[type="number"] {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+      colorscheme: dark;
+    }
+
+    input[type="number"] { width: 70px; text-align: center; }
+
+    input:focus { border-color: var(--accent); }
+
+    .btn-log {
+      background: var(--accent3);
+      border: 1px solid var(--accent2);
+      border-radius: var(--radius);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-log:hover { background: var(--accent4); }
+    .btn-log:active { transform: scale(0.97); }
+
+    .btn-set {
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-set:hover { border-color: var(--border2); color: var(--text); }
+
+    .toast {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.3s;
+      padding-left: 4px;
+    }
+
+    .toast.show { opacity: 1; }
+
+    /* Grid */
+    .grid-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .month-block { margin-bottom: 20px; }
+    .month-block:last-child { margin-bottom: 0; }
+
+    .month-header {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+
+    .day-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .day-cell {
+      width: 28px;
+      height: 28px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.1s, outline 0.1s;
+      outline: 1.5px solid transparent;
+    }
+
+    .day-cell:hover { transform: scale(1.2); z-index: 2; outline: 1.5px solid rgba(255,255,255,0.25); }
+    .day-cell:active { transform: scale(0.95); }
+
+    .day-cell.l0 { background: var(--l0); color: var(--muted); }
+    .day-cell.l1 { background: var(--l1); color: #7fd1a0; }
+    .day-cell.l2 { background: var(--l2); color: #c8ffe0; }
+    .day-cell.l3 { background: var(--l3); color: #073d1f; }
+    .day-cell.l4 { background: var(--l4); color: #073d1f; }
+    .day-cell.l5 { background: var(--l5); color: #073d1f; }
+
+    .day-cell.today { outline: 1.5px solid var(--accent); }
+
+    .tip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 5px 9px;
+      white-space: nowrap;
+      font-size: 11px;
+      color: var(--text);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 10;
+    }
+
+    .day-cell:hover .tip { opacity: 1; }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 14px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .leg { width: 12px; height: 12px; border-radius: 2px; }
+
+    /* Weekly bar chart */
+    .chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .section-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 180px;
+    }
+
+    @media (max-width: 600px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      header { flex-direction: column; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>job-tracker</h1>
+  <span id="header-date"></span>
+</header>
+
+<main class="main">
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Total apps</div>
+      <div class="stat-value accent" id="s-total">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Active days</div>
+      <div class="stat-value" id="s-days">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Best day</div>
+      <div class="stat-value" id="s-best">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">This week</div>
+      <div class="stat-value" id="s-week">0</div>
+    </div>
+  </div>
+
+  <div class="streak-bar" id="streak-bar"></div>
+
+  <div class="log-row">
+    <span class="log-label">Log</span>
+    <input type="date" id="inp-date" />
+    <input type="number" id="inp-count" value="1" min="0" max="99" />
+    <button class="btn-log" onclick="logApps()">+ add</button>
+    <button class="btn-set" onclick="setApps()">set exact</button>
+    <span class="toast" id="toast"></span>
+  </div>
+
+  <div class="grid-wrap" id="grid-wrap"></div>
+
+  <div class="chart-wrap">
+    <div class="section-title">Weekly totals</div>
+    <div class="chart-container">
+      <canvas id="weekly-chart" role="img" aria-label="Bar chart showing weekly job application totals"></canvas>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const SEED = {
+  "2026-03-19":18,"2026-03-21":6,"2026-03-22":11,"2026-03-23":6,
+  "2026-03-24":15,"2026-03-25":20,"2026-03-26":14,"2026-03-27":1,
+  "2026-03-30":4,"2026-03-31":1,
+  "2026-04-21":1,
+  "2026-05-06":5,"2026-05-07":3,"2026-05-11":12,"2026-05-13":1,
+  "2026-05-14":10,"2026-05-15":9,"2026-05-16":16,"2026-05-19":1,
+  "2026-05-22":11,"2026-05-24":1
+};
+
+const STORE_KEY = "smriti_job_tracker_v1";
+let data = {};
+let weeklyChart = null;
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    data = raw ? JSON.parse(raw) : {...SEED};
+  } catch(e) { data = {...SEED}; }
+}
+
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function toKey(d) { return d.toISOString().slice(0,10); }
+
+function today() { return toKey(new Date()); }
+
+function getLevel(n) {
+  if (!n || n === 0) return "l0";
+  if (n <= 3) return "l1";
+  if (n <= 8) return "l2";
+  if (n <= 14) return "l3";
+  if (n <= 18) return "l4";
+  return "l5";
+}
+
+function getWeekStart(d) {
+  const dt = d ? new Date(d) : new Date();
+  const day = dt.getDay();
+  dt.setDate(dt.getDate() - day);
+  return toKey(dt);
+}
+
+function calcStreaks() {
+  const keys = Object.keys(data).filter(k => data[k] > 0).sort();
+  if (!keys.length) return { current: 0, longest: 0 };
+
+  let longest = 1, cur = 1;
+  for (let i = 1; i < keys.length; i++) {
+    const prev = new Date(keys[i-1]);
+    const curr = new Date(keys[i]);
+    const diff = (curr - prev) / 86400000;
+    if (diff === 1) { cur++; longest = Math.max(longest, cur); }
+    else { cur = 1; }
+  }
+
+  // current streak: walk back from today
+  const todayKey = today();
+  let d = new Date(todayKey);
+  let streak = 0;
+  while (true) {
+    const k = toKey(d);
+    if (data[k] && data[k] > 0) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+
+  return { current: streak, longest };
+}
+
+function updateStats() {
+  const vals = Object.values(data).filter(v => v > 0);
+  document.getElementById("s-total").textContent = vals.reduce((a,b)=>a+b,0);
+  document.getElementById("s-days").textContent = vals.length;
+  document.getElementById("s-best").textContent = vals.length ? Math.max(...vals) : 0;
+  const ws = getWeekStart();
+  const weekSum = Object.entries(data)
+    .filter(([k,v]) => k >= ws && v > 0)
+    .reduce((a,[,v])=>a+v, 0);
+  document.getElementById("s-week").textContent = weekSum;
+}
+
+function updateStreak() {
+  const { current, longest } = calcStreaks();
+  const isActive = current > 0;
+  const bar = document.getElementById("streak-bar");
+  bar.innerHTML = `
+    <div class="streak-item">
+      <div class="streak-dot${isActive ? '' : ' cold'}"></div>
+      <span class="streak-num${isActive ? '' : ' cold'}">${current}</span>
+      <span class="streak-label">day streak</span>
+    </div>
+    <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
+    <div class="streak-item">
+      <div class="streak-dot" style="background:var(--muted)"></div>
+      <span class="streak-num" style="color:var(--muted)">${longest}</span>
+      <span class="streak-label">longest streak</span>
+    </div>
+    <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
+    <div class="streak-item">
+      <span class="streak-label">${isActive ? '🔥 keep going' : 'apply today to start a streak'}</span>
+    </div>
+  `;
+}
+
+function buildGrid() {
+  const months = [{y:2026,m:2},{y:2026,m:3},{y:2026,m:4}];
+  const todayKey = today();
+  const names = ["March","April","May"];
+  let html = "";
+  months.forEach(({y,m}, idx) => {
+    const days = new Date(y, m+1, 0).getDate();
+    html += `<div class="month-block"><div class="month-header">${names[idx]} ${y}</div><div class="day-row">`;
+    for (let d = 1; d <= days; d++) {
+      const date = new Date(y, m, d);
+      const key = toKey(date);
+      const count = data[key] || 0;
+      const lvl = getLevel(count);
+      const isToday = key === todayKey ? " today" : "";
+      const dayName = date.toLocaleDateString("en-US",{weekday:"short"});
+      const tipText = count > 0 ? `${dayName} ${d}: ${count} app${count!==1?"s":""}` : `${dayName} ${d}`;
+      html += `<div class="day-cell ${lvl}${isToday}" onclick="clickCell('${key}')" data-key="${key}">
+        ${d}
+        <div class="tip">${tipText}</div>
+      </div>`;
+    }
+    html += `</div></div>`;
+  });
+  document.getElementById("grid-wrap").innerHTML = html;
+}
+
+function buildWeeklyChart() {
+  // build last 12 weeks
+  const weeks = [];
+  const todayDate = new Date();
+  const ws = new Date(todayDate);
+  ws.setDate(ws.getDate() - ws.getDay());
+
+  for (let i = 11; i >= 0; i--) {
+    const start = new Date(ws);
+    start.setDate(start.getDate() - i * 7);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    const label = start.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+    let total = 0;
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(start);
+      day.setDate(day.getDate() + d);
+      const k = toKey(day);
+      total += data[k] || 0;
+    }
+    weeks.push({ label, total });
+  }
+
+  const labels = weeks.map(w => w.label);
+  const vals = weeks.map(w => w.total);
+  const maxVal = Math.max(...vals, 1);
+
+  const colors = vals.map(v => {
+    if (v === 0) return "#1b1e1c";
+    const ratio = v / maxVal;
+    if (ratio < 0.25) return "#0d5c30";
+    if (ratio < 0.5) return "#1a9e55";
+    if (ratio < 0.75) return "#2ecc71";
+    return "#3ddc84";
+  });
+
+  if (weeklyChart) weeklyChart.destroy();
+
+  weeklyChart = new Chart(document.getElementById("weekly-chart"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        data: vals,
+        backgroundColor: colors,
+        borderRadius: 3,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#1b1e1c",
+          borderColor: "rgba(255,255,255,0.1)",
+          borderWidth: 1,
+          titleColor: "#3ddc84",
+          bodyColor: "#e8ede9",
+          titleFont: { family: "'DM Mono', monospace", size: 11 },
+          bodyFont: { family: "'DM Mono', monospace", size: 11 },
+          callbacks: {
+            label: ctx => ` ${ctx.parsed.y} applications`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: "#6b7a6d",
+            font: { family: "'DM Mono', monospace", size: 10 },
+            maxRotation: 45
+          },
+          grid: { color: "rgba(255,255,255,0.04)" }
+        },
+        y: {
+          ticks: {
+            color: "#6b7a6d",
+            font: { family: "'DM Mono', monospace", size: 10 },
+            stepSize: 5
+          },
+          grid: { color: "rgba(255,255,255,0.04)" },
+          min: 0
+        }
+      }
+    }
+  });
+}
+
+function render() {
+  updateStats();
+  updateStreak();
+  buildGrid();
+  buildWeeklyChart();
+}
+
+function clickCell(key) {
+  if (key > today()) return;
+  document.getElementById("inp-date").value = key;
+  document.getElementById("inp-count").focus();
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+function logApps() {
+  const key = document.getElementById("inp-date").value;
+  const n = parseInt(document.getElementById("inp-count").value) || 0;
+  if (!key || n === 0 || key > today()) return;
+  data[key] = (data[key] || 0) + n;
+  save();
+  render();
+  showToast(`+${n} logged`);
+  document.getElementById("inp-count").value = 1;
+}
+
+function setApps() {
+  const key = document.getElementById("inp-date").value;
+  const n = parseInt(document.getElementById("inp-count").value);
+  if (!key || isNaN(n) || key > today()) return;
+  data[key] = n;
+  save();
+  render();
+  showToast(`set to ${n}`);
+}
+
+// header date
+document.getElementById("header-date").textContent = new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"}).toLowerCase();
+
+// default date input, capped at today
+  const inpDate = document.getElementById("inp-date"); inpDate.value = today(); inpDate.max = today();
+
+// enter to log
+document.getElementById("inp-count").addEventListener("keydown", e => { if (e.key === "Enter") logApps(); });
+
+load();
+render();
+</script>
+
+</body>
+</html>
