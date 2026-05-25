@@ -169,6 +169,7 @@
     <input type="number" id="inp-count" value="1" min="0" max="99" />
     <button class="btn-log" onclick="logApps()">+ add</button>
     <button class="btn-set" onclick="setApps()">set exact</button>
+    <button class="btn-set" onclick="exportCSV()">export csv</button>
     <span class="toast" id="toast"></span>
   </div>
 
@@ -510,6 +511,22 @@ function setApps() {
   data[key] = n;
   save(); render();
   showToast(`set to ${n}`);
+}
+
+/* ── Export ── */
+function exportCSV() {
+  const rows = [["date","applications"]];
+  const sorted = Object.keys(data).filter(k => data[k] > 0).sort();
+  sorted.forEach(k => rows.push([k, data[k]]));
+  const csv = rows.map(r => r.join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "job-applications.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("csv exported");
 }
 
 /* ── Init ── */
