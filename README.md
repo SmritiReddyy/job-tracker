@@ -52,8 +52,4 @@ Personal job application tracker — GitHub contributions graph style.
 
 ## Extending
 
-To add more months to the grid, find the `months` array in the `<script>` tag:
-```js
-const months = [{y:2026,m:2},{y:2026,m:3},{y:2026,m:4}];
-```
-Months are 0-indexed (0 = Jan, 4 = May). Add `{y:2026,m:5}` for June, etc.
+New months appear automatically — the grid always shows March 2026 through the current month.
