@@ -505,9 +505,15 @@ function buildGrid() {
   }
   const todayKey = today();
   let html = "";
-  months.forEach(({y,m}) => {
+  // add next month as view-only
+  const nextM = now.getMonth() + 1 > 11 ? 0 : now.getMonth() + 1;
+  const nextY = now.getMonth() + 1 > 11 ? now.getFullYear() + 1 : now.getFullYear();
+  months.push({y:nextY, m:nextM, viewOnly:true});
+
+  months.forEach(({y,m,viewOnly}) => {
     const days = new Date(y, m+1, 0).getDate();
-    html += `<div class="month-block"><div class="month-header">${monthNames[m]} ${y}</div><div class="day-row">`;
+    const headerSuffix = viewOnly ? ' <span style="font-size:9px;color:var(--muted);margin-left:6px">view only</span>' : '';
+    html += `<div class="month-block"><div class="month-header">${monthNames[m]} ${y}${headerSuffix}</div><div class="day-row">`;
     for (let d = 1; d <= days; d++) {
       const date = new Date(y, m, d);
       const key = toKey(date);
@@ -516,7 +522,9 @@ function buildGrid() {
       const isToday = key === todayKey ? " today" : "";
       const dayName = date.toLocaleDateString("en-US",{weekday:"short"});
       const tipText = count > 0 ? `${dayName} ${d}: ${count} app${count!==1?"s":""}` : `${dayName} ${d}`;
-      html += `<div class="day-cell ${lvl}${isToday}" onclick="clickCell('${key}')" data-key="${key}">
+      const cellStyle = viewOnly ? ' style="cursor:default;opacity:0.45"' : '';
+      const cellClick = viewOnly ? '' : `onclick="clickCell('${key}')"`;
+      html += `<div class="day-cell ${lvl}${isToday}" ${cellClick}${cellStyle} data-key="${key}">
         ${d}
         <div class="tip">${tipText}</div>
       </div>`;

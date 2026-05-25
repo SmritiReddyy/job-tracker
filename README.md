@@ -3,7 +3,7 @@
 Personal job application tracker — GitHub contributions graph style.
 
 ## Features
-- Heatmap grid (March–May 2026) with color intensity by daily count
+- Heatmap grid (March 2026 onward, auto-expands each month) with color intensity by daily count
 - Current + longest streak counter
 - Weekly bar chart (last 12 weeks)
 - Click any day cell to select it, then log or set the count
