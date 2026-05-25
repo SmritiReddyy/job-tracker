@@ -60,7 +60,7 @@
     .goal-input:focus { border-color: var(--accent); }
     .goal-set-btn { font-family: var(--font-mono); font-size: 10px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: color 0.15s; flex-shrink: 0; }
     .goal-set-btn:hover { color: var(--text); border-color: var(--accent2); }
-    .goal-msg { font-family: var(--font-mono); font-size: 10px; color: var(--muted); flex: 1; min-width: 80px; }
+    .goal-msg { font-family: var(--font-mono); font-size: 10px; color: var(--muted); flex: 2; min-width: 160px; }
     /* Streak */
     .streak-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
     .streak-item { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; }
@@ -254,7 +254,36 @@ function saveGoal(type) {
 function updateGoalRow(type, current) {
   const target = goal[type] || 0;
   const pct = target > 0 ? Math.min(100, Math.round(current / target * 100)) : 0;
-  const labels = { daily: "today", weekly: "this week", monthly: "this month" };
+  const now = new Date();
+
+  // time remaining
+  let timeLeft = "";
+  let behindMsg = "";
+  if (type === "daily") {
+    const hoursLeft = 23 - now.getHours();
+    const minsLeft  = 59 - now.getMinutes();
+    timeLeft = hoursLeft > 0 ? `${hoursLeft}h ${minsLeft}m left today` : `${minsLeft}m left today`;
+    if (target > 0 && current < target) {
+      const needed = target - current;
+      behindMsg = hoursLeft > 0 ? ` · ${(needed / (hoursLeft + minsLeft/60)).toFixed(1)}/hr needed` : "";
+    }
+  } else if (type === "weekly") {
+    const dayOfWeek = now.getDay(); // 0=Sun
+    const daysLeft  = 6 - dayOfWeek;
+    timeLeft = daysLeft === 0 ? "last day of week" : `${daysLeft} day${daysLeft!==1?"s":""} left this week`;
+    if (target > 0 && current < target && daysLeft > 0) {
+      const needed = target - current;
+      behindMsg = ` · ${Math.ceil(needed / (daysLeft + 1))}/day needed`;
+    }
+  } else {
+    const lastDay   = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+    const daysLeft  = lastDay - now.getDate();
+    timeLeft = daysLeft === 0 ? "last day of month" : `${daysLeft} day${daysLeft!==1?"s":""} left this month`;
+    if (target > 0 && current < target && daysLeft > 0) {
+      const needed = target - current;
+      behindMsg = ` · ${Math.ceil(needed / (daysLeft + 1))}/day needed`;
+    }
+  }
 
   document.getElementById("goal-input-"+type).value = target || "";
   document.getElementById("goal-nums-"+type).innerHTML = `<span>${current}</span> / ${target || "—"}`;
@@ -265,9 +294,12 @@ function updateGoalRow(type, current) {
   fill.className = "progress-fill" + (pct >= 100 ? " done" : pct < 40 ? " warn" : "");
 
   let msg = "";
-  if (!target) { msg = "no target set"; }
-  else if (pct >= 100) { msg = "🎉 done " + labels[type] + "!"; }
-  else { msg = `${target - current} left`; }
+  if (!target)        { msg = "no target set"; }
+  else if (pct >= 100){ msg = "🎉 goal hit!"; }
+  else {
+    const left = target - current;
+    msg = `${left} left · ${timeLeft}${behindMsg}`;
+  }
   document.getElementById("goal-msg-"+type).textContent = msg;
 }
 
