@@ -45,24 +45,22 @@
     .stat-value.accent { color: var(--accent); }
 
     /* Goal bar */
-    .goal-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
-    .goal-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
-    .goal-left { display: flex; align-items: center; gap: 10px; }
-    .goal-title { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-    .goal-nums { font-family: var(--font-mono); font-size: 13px; color: var(--text); }
+    .goal-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+    .goal-row { display: flex; align-items: center; gap: 10px; }
+    .goal-tag { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; width: 52px; flex-shrink: 0; }
+    .goal-nums { font-family: var(--font-mono); font-size: 12px; color: var(--text); width: 72px; flex-shrink: 0; }
     .goal-nums span { color: var(--accent); }
-    .goal-right { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
-    .goal-input { width: 56px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; color: var(--text); font-family: var(--font-mono); font-size: 12px; padding: 4px 8px; outline: none; text-align: center; }
-    .goal-input:focus { border-color: var(--accent); }
-    .goal-type { display: flex; gap: 4px; }
-    .goal-type button { font-family: var(--font-mono); font-size: 10px; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; }
-    .goal-type button.active { background: var(--accent3); border-color: var(--accent2); color: var(--accent); }
-    .progress-track { background: var(--surface2); border-radius: 99px; height: 6px; overflow: hidden; }
+    .goal-bar-wrap { flex: 1; }
+    .progress-track { background: var(--surface2); border-radius: 99px; height: 5px; overflow: hidden; }
     .progress-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.4s ease; }
     .progress-fill.done { background: var(--l5); }
     .progress-fill.warn { background: #f0a500; }
-    .goal-footer { display: flex; justify-content: space-between; margin-top: 6px; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
-
+    .goal-pct { font-family: var(--font-mono); font-size: 10px; color: var(--muted); width: 32px; text-align: right; flex-shrink: 0; }
+    .goal-input { width: 52px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; color: var(--text); font-family: var(--font-mono); font-size: 11px; padding: 3px 6px; outline: none; text-align: center; }
+    .goal-input:focus { border-color: var(--accent); }
+    .goal-set-btn { font-family: var(--font-mono); font-size: 10px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: color 0.15s; flex-shrink: 0; }
+    .goal-set-btn:hover { color: var(--text); border-color: var(--accent2); }
+    .goal-msg { font-family: var(--font-mono); font-size: 10px; color: var(--muted); flex: 1; min-width: 80px; }
     /* Streak */
     .streak-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
     .streak-item { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; }
@@ -134,23 +132,33 @@
 
   <!-- Goal tracker -->
   <div class="goal-wrap">
-    <div class="goal-top">
-      <div class="goal-left">
-        <div class="goal-title">Goal</div>
-        <div class="goal-nums" id="goal-nums"><span>0</span> / 0</div>
-      </div>
-      <div class="goal-right">
-        <div class="goal-type">
-          <button id="btn-daily" class="active" onclick="setGoalType('daily')">daily</button>
-          <button id="btn-weekly" onclick="setGoalType('weekly')">weekly</button>
-          <button id="btn-monthly" onclick="setGoalType('monthly')">monthly</button>
-        </div>
-        <input type="number" class="goal-input" id="goal-input" min="1" max="999" placeholder="—" />
-        <button class="btn-set" onclick="saveGoal()" style="padding:4px 10px;font-size:10px;">set</button>
-      </div>
+    <div class="goal-row">
+      <div class="goal-tag">daily</div>
+      <div class="goal-nums" id="goal-nums-daily"><span>0</span> / —</div>
+      <div class="goal-bar-wrap"><div class="progress-track"><div class="progress-fill" id="progress-daily" style="width:0%"></div></div></div>
+      <div class="goal-pct" id="goal-pct-daily"></div>
+      <div class="goal-msg" id="goal-msg-daily"></div>
+      <input type="number" class="goal-input" id="goal-input-daily" min="1" max="999" placeholder="—" />
+      <button class="goal-set-btn" onclick="saveGoal('daily')">set</button>
     </div>
-    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-    <div class="goal-footer"><span id="goal-msg"></span><span id="goal-pct"></span></div>
+    <div class="goal-row">
+      <div class="goal-tag">weekly</div>
+      <div class="goal-nums" id="goal-nums-weekly"><span>0</span> / —</div>
+      <div class="goal-bar-wrap"><div class="progress-track"><div class="progress-fill" id="progress-weekly" style="width:0%"></div></div></div>
+      <div class="goal-pct" id="goal-pct-weekly"></div>
+      <div class="goal-msg" id="goal-msg-weekly"></div>
+      <input type="number" class="goal-input" id="goal-input-weekly" min="1" max="999" placeholder="—" />
+      <button class="goal-set-btn" onclick="saveGoal('weekly')">set</button>
+    </div>
+    <div class="goal-row">
+      <div class="goal-tag">monthly</div>
+      <div class="goal-nums" id="goal-nums-monthly"><span>0</span> / —</div>
+      <div class="goal-bar-wrap"><div class="progress-track"><div class="progress-fill" id="progress-monthly" style="width:0%"></div></div></div>
+      <div class="goal-pct" id="goal-pct-monthly"></div>
+      <div class="goal-msg" id="goal-msg-monthly"></div>
+      <input type="number" class="goal-input" id="goal-input-monthly" min="1" max="999" placeholder="—" />
+      <button class="goal-set-btn" onclick="saveGoal('monthly')">set</button>
+    </div>
   </div>
 
   <div class="streak-bar" id="streak-bar"></div>
@@ -197,7 +205,7 @@ const STORE_KEY = "smriti_job_tracker_v1";
 const GOAL_KEY  = "smriti_job_tracker_goal_v1";
 
 let data = {};
-let goal = { type: "daily", target: 10 };
+let goal = { daily: 10, weekly: 30, monthly: 100 };
 let weeklyChart = null;
 let monthlyChart = null;
 
@@ -233,54 +241,44 @@ function getWeekStart(d) {
 }
 
 /* ── Goal ── */
-function setGoalType(type) {
-  goal.type = type;
-  ["daily","weekly","monthly"].forEach(t => document.getElementById("btn-"+t).classList.toggle("active", t===type));
-  updateGoal();
-}
-
-function saveGoal() {
-  const v = parseInt(document.getElementById("goal-input").value);
+function saveGoal(type) {
+  const v = parseInt(document.getElementById("goal-input-"+type).value);
   if (!v || v < 1) return;
-  goal.target = v;
+  goal[type] = v;
   saveGoalStore();
   updateGoal();
-  showToast("goal saved");
+  showToast(type + " goal saved");
+}
+
+function updateGoalRow(type, current) {
+  const target = goal[type] || 0;
+  const pct = target > 0 ? Math.min(100, Math.round(current / target * 100)) : 0;
+  const labels = { daily: "today", weekly: "this week", monthly: "this month" };
+
+  document.getElementById("goal-input-"+type).value = target || "";
+  document.getElementById("goal-nums-"+type).innerHTML = `<span>${current}</span> / ${target || "—"}`;
+  document.getElementById("goal-pct-"+type).textContent = target > 0 ? pct+"%" : "";
+
+  const fill = document.getElementById("progress-"+type);
+  fill.style.width = pct + "%";
+  fill.className = "progress-fill" + (pct >= 100 ? " done" : pct < 40 ? " warn" : "");
+
+  let msg = "";
+  if (!target) { msg = "no target set"; }
+  else if (pct >= 100) { msg = "🎉 done " + labels[type] + "!"; }
+  else { msg = `${target - current} left`; }
+  document.getElementById("goal-msg-"+type).textContent = msg;
 }
 
 function updateGoal() {
-  // sync button states
-  ["daily","weekly","monthly"].forEach(t => document.getElementById("btn-"+t).classList.toggle("active", t===goal.type));
-  document.getElementById("goal-input").value = goal.target || "";
-
-  const now = new Date();
-  let current = 0;
-
-  if (goal.type === "daily") {
-    current = data[today()] || 0;
-  } else if (goal.type === "weekly") {
-    const ws = getWeekStart();
-    current = Object.entries(data).filter(([k,v]) => k >= ws && v > 0).reduce((a,[,v])=>a+v, 0);
-  } else {
-    const prefix = today().slice(0,7);
-    current = Object.entries(data).filter(([k,v]) => k.startsWith(prefix) && v > 0).reduce((a,[,v])=>a+v, 0);
-  }
-
-  const target = goal.target || 0;
-  const pct = target > 0 ? Math.min(100, Math.round(current / target * 100)) : 0;
-  const fill = document.getElementById("progress-fill");
-  fill.style.width = pct + "%";
-  fill.className = "progress-fill" + (pct >= 100 ? " done" : pct >= 70 ? "" : pct >= 40 ? " warn" : "");
-
-  const label = goal.type === "daily" ? "today" : goal.type === "weekly" ? "this week" : "this month";
-  document.getElementById("goal-nums").innerHTML = `<span>${current}</span> / ${target || "—"}`;
-  document.getElementById("goal-pct").textContent = target > 0 ? pct + "%" : "";
-
-  let msg = "";
-  if (!target) { msg = "set a target above"; }
-  else if (pct >= 100) { msg = "🎉 goal reached " + label + "!"; }
-  else { const left = target - current; msg = `${left} more to hit ${label}'s goal`; }
-  document.getElementById("goal-msg").textContent = msg;
+  const dailyCurrent = data[today()] || 0;
+  const ws = getWeekStart();
+  const weeklyCurrent = Object.entries(data).filter(([k,v]) => k >= ws && v > 0).reduce((a,[,v])=>a+v, 0);
+  const prefix = today().slice(0,7);
+  const monthlyCurrent = Object.entries(data).filter(([k,v]) => k.startsWith(prefix) && v > 0).reduce((a,[,v])=>a+v, 0);
+  updateGoalRow("daily", dailyCurrent);
+  updateGoalRow("weekly", weeklyCurrent);
+  updateGoalRow("monthly", monthlyCurrent);
 }
 
 /* ── Stats ── */
