@@ -225,7 +225,9 @@ function saveGoalStore() {
 
 /* ── Helpers ── */
 function toKey(d) { return d.toISOString().slice(0,10); }
-function today()  { return toKey(new Date()); }
+function today() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+}
 
 function getLevel(n) {
   if (!n) return "l0";
@@ -506,6 +508,11 @@ function buildWeeklyChart() {
 
 /* ── Render ── */
 function render() {
+  // always refresh max date so tabs open past midnight stay correct
+  const inpDate = document.getElementById("inp-date");
+  const t = today();
+  inpDate.max = t;
+  if (inpDate.value > t) inpDate.value = t;
   updateStats();
   updateStreak();
   updateGoal();
@@ -530,11 +537,17 @@ function showToast(msg) {
 function logApps() {
   const key = document.getElementById("inp-date").value;
   const n   = parseInt(document.getElementById("inp-count").value) || 0;
-  if (!key || n === 0 || key > today()) return;
+  const t   = today();
+  if (!key || n === 0 || key > t) return;
   data[key] = (data[key] || 0) + n;
   save(); render();
   showToast(`+${n} logged`);
   document.getElementById("inp-count").value = 1;
+  // reset date input to today and refresh max (handles tabs open past midnight)
+  const inpDate = document.getElementById("inp-date");
+  inpDate.max = t;
+  // only reset to today if user was on today — preserve intentional past-day selection
+  if (key === t) inpDate.value = t;
 }
 
 function setApps() {
