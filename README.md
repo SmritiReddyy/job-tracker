@@ -1,8 +1,9 @@
 # eat-pray-apply
 
 > Touch grass occasionally. Apply relentlessly. Somewhere between refreshing your inbox and questioning your life choices, this app keeps count so you don't have to.
- 
-> Track your job applications the way GitHub tracks your commits.
+
+
+Track your job applications the way GitHub tracks your commits.
 
 **Live demo:** [smritireddyy.github.io/job-tracker](https://smritireddyy.github.io/job-tracker/)
 
