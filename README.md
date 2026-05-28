@@ -64,7 +64,7 @@ Cells get darker as the count goes up. Hover any cell to see the exact count for
 1. Create a new **public** repo at [github.com/new](https://github.com/new)
 2. Upload `index.html` via **Add file → Upload files**
 3. Go to **Settings → Pages → Source: Deploy from branch → main / root → Save**
-4. Visit `https://<your-username>.github.io/job-tracker/` in ~60 seconds
+4. Visit `https://<your-username>.github.io/eat-pray-apply/` in ~60 seconds
 
 No build step needed. The file is self-contained.
 
