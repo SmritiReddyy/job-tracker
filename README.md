@@ -11,7 +11,7 @@ Track your job applications the way GitHub tracks your commits.
 
 ## Why
 
-Most job seekers lose track of their momentum. A spreadsheet is tedious. ATS tools are overkill. job-tracker gives you one thing: a visual record of how consistently you're showing up — the same satisfaction loop as a GitHub contribution graph, applied to your job search.
+Most job seekers lose track of their momentum. A spreadsheet is tedious. ATS tools are overkill. eat-pray-apply gives you one thing: a visual record of how consistently you're showing up — the same satisfaction loop as a GitHub contribution graph, applied to your job search.
 
 No account. No backend. No ads. Just open the URL and log your applications.
 
